@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MemoryCard from "../components/MemoryCard";
 import { memories } from "../data/memories";
 import { AnimatePresence } from "framer-motion";
 import ProgressBar from "../components/ProgressBar";
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function Page() {
   const [currentId, setCurrentId] = useState(1);
@@ -13,6 +15,17 @@ export default function Page() {
   const handleChoose = (nextId: number) => {
     setCurrentId(nextId);
   };
+    
+  useEffect(() => {
+    const logVisit = async () => {
+      await addDoc(collection(db, 'visits'), {
+        visitedAt: serverTimestamp(),
+        userAgent: navigator.userAgent
+      });
+    };
+
+    logVisit();
+  }, []);
 
   return (
     <div style={{ padding: "20px" }}>

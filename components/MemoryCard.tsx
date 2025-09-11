@@ -1,7 +1,8 @@
 "use client";
-
+import { doc, setDoc, collection } from "firebase/firestore";
 import { Card, CardContent, Typography, Button, Stack } from "@mui/material";
 import { Memory } from "../data/memories";
+import {db} from '../lib/firebase';
 import { motion } from "framer-motion";
 
 interface MemoryCardProps {
@@ -9,7 +10,25 @@ interface MemoryCardProps {
   onChoose: (nextId: number) => void;
 }
 
-export default function MemoryCard({ memory, onChoose }: MemoryCardProps) {
+export default function MemoryCard({ memory,
+   onChoose }: MemoryCardProps) {
+    const handleClick =  async (nextId: number) => {
+      try {
+        const logRef = doc(
+          collection(db, "interactions")
+        );
+      await setDoc(logRef, {
+        memoryId: memory.id,
+        memoryTitle: memory.title,
+        chosenOption:nextId,
+        timestamp: new Date().toISOString(),
+      });
+        console.log("Logged to Firestore.")
+      }catch (err){
+        console.error("Error logging to Firestore: ", err);
+    }
+    onChoose(nextId);
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,7 +48,7 @@ export default function MemoryCard({ memory, onChoose }: MemoryCardProps) {
               <Button
                 key={index}
                 variant="contained"
-                onClick={() => onChoose(option.nextId)}
+                onClick={() => handleClick(option.nextId)}
               >
                 {option.text}
               </Button>
